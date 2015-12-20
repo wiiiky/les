@@ -18,21 +18,12 @@
 #include <Python.h>
 #include <sph.h>
 
-static PyMethodDef SphMethods[] = {
-    {NULL, NULL, 0, NULL}
-};
+typedef struct {
+    PyObject_HEAD
+    SphSocket *socket;
+} SocketObject;
+
+PyMODINIT_FUNC PyInit_lessph(void);
 
 
-static struct PyModuleDef SphModule = {
-    PyModuleDef_HEAD_INIT,
-    "sph",
-    NULL,
-    -1,
-    SphMethods
-};
-
-PyMODINIT_FUNC PyInit_sph(void) {
-    PyObject *m = PyModule_Create(&SphModule);
-    return m;
-}
-
+PyObject *py_sph_socket_new(SphSocket *socket);

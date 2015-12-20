@@ -30,10 +30,9 @@ def pkgconfig(*packages):
     return flags
 
 
-sph = Extension('sph',
-                sources=['sph/sph.c'],
-                **pkgconfig('sph')
-                )
+lessph = Extension('lessph', sources=['les/les-sph.c'], **pkgconfig('sph'))
+les = Extension('les', sources=['les/les.c', 'les/les-sph.c'],
+                **pkgconfig('sph'))
 
 setup(name='sph',
       version='0.1',
@@ -41,7 +40,7 @@ setup(name='sph',
       author='Wiky L',
       author_email='wiiiky@outlook.com',
       url='',
-      ext_modules=[sph],
+      ext_modules=[lessph, les],
       classifiers=[
           'Development Status :: 3 - Alpha',
           'Intended Audience :: Developers',
