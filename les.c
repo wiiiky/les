@@ -23,22 +23,18 @@ typedef struct {
     PyObject *les;
 } ModuleData;
 
-static int m_init(void);
 static void m_finalize(void);
 static int m_accept(SphSocket *socket);
 static int m_recv(SphSocket *socket,const uint8_t *data, unsigned int len);
 
-static JacModule mod = {
-    m_init,
+static JacModule lesMod = {
     m_finalize,
     m_accept,
     m_recv
 };
 
-JACQUES_MODULE(mod);
-
-static int m_init(void) {
-    printf("m_init\n");
+JacModule *JacInit_les(void) {
+    printf("les init\n");
     Py_Initialize();
 
     PyObject *lessph = PyInit_lessph();
@@ -49,26 +45,26 @@ static int m_init(void) {
     if(!les) {
         PyErr_Print();
         Py_Finalize();
-        return -1;
+        return NULL;
     }
     ModuleData *data=(ModuleData*)malloc(sizeof(ModuleData));
     data->les = les;
     data->lessph = lessph;
 
-    mod.user_data = data;
-    return 0;
+    lesMod.user_data = data;
+    return &lesMod;
 }
 
 static void m_finalize(void) {
-    printf("m_finalize!\n");
-    ModuleData *data=(ModuleData*)mod.user_data;
+    printf("les finalize!\n");
+    ModuleData *data=(ModuleData*)lesMod.user_data;
     Py_DECREF(data->les);
     Py_DECREF(data->lessph);
     Py_Finalize();
 }
 
 static int m_accept(SphSocket *socket) {
-    ModuleData *data=(ModuleData*)mod.user_data;
+    ModuleData *data=(ModuleData*)lesMod.user_data;
     PyObject* func = PyObject_GetAttrString(data->les, (char*)"accept");
     if(func && PyCallable_Check(func)) {
         PyObject *args = PyTuple_New(1);
@@ -88,7 +84,7 @@ static int m_accept(SphSocket *socket) {
 }
 
 static int m_recv(SphSocket *socket,const uint8_t *data, unsigned int len) {
-    PyObject* func = PyObject_GetAttrString(((ModuleData*)mod.user_data)->les, (char*)"recv");
+    PyObject* func = PyObject_GetAttrString(((ModuleData*)lesMod.user_data)->les, (char*)"recv");
     if(func && PyCallable_Check(func)) {
         PyObject *args = PyTuple_New(2);
         PyTuple_SetItem(args, 0, py_sph_socket_new(socket));
